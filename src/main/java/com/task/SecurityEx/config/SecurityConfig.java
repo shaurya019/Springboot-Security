@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -27,12 +28,12 @@ public class SecurityConfig {
 
     //        default service
     @Bean
-    public DefaultSecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public DefaultSecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http.csrf(customizer -> customizer.disable())
-                   .authorizeHttpRequests(request ->request.anyRequest().authenticated())
-                   .httpBasic(Customizer.withDefaults())
-                   .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
+                .authorizeHttpRequests(request -> request.anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
     }
 
 //    our service
@@ -56,9 +57,12 @@ public class SecurityConfig {
 //    }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
+        provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
         provider.setUserDetailsService(userDetailsService);
+
+        return provider;
     }
+
 }
